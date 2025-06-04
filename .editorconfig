@@ -1,0 +1,31 @@
+root = true
+
+# Settings for all project
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Settings for C++
+[*.{c++,cc,cpp,cxx,h,h++,hh,hpp,hxx,inl,ipp,tlh,tli}]
+indent_size = 4
+max_line_length = 120
+
+# Settings for CMake
+[CMakeLists.txt]
+indent_size = 2
+
+[*.cmake]
+indent_size = 2
+
+# Settings for Markdown
+
+[*.md]
+trim_trailing_whitespace = false
+
+# Settings for shaders
+[*.{vert,frag,geom,comp,glsl}]
+indent_size = 4

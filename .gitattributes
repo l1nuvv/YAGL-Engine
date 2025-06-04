@@ -1,0 +1,36 @@
+# --- Core Source Files ---
+# Treat all source files as text, enforce LF line endings
+*.cpp text eol=lf
+*.hpp text eol=lf
+*.h   text eol=lf
+*.c   text eol=lf
+*.inl text eol=lf
+
+# --- CMake ---
+# CMake files should use LF and be treated as text
+CMakeLists.txt text eol=lf
+*.cmake        text eol=lf
+
+# --- 3rd Party Libraries ---
+# GLFW/Glad/GLM/spdlog: exclude binary files from diff
+third_party/glad/src/*.c -text
+third_party/glad/include/** linguist-generated
+third_party/glm/glm/**    linguist-generated
+third_party/spdlog/**     linguist-generated
+
+# --- Build Artifacts ---
+# Binary/compiled files (explicitly exclude from version control)
+build/**      binary
+*-build/**    binary
+*.dll         binary
+*.so          binary
+*.a           binary
+*.lib         binary
+*.exe         binary
+
+# --- Git Merge Strategy ---
+# Prefer "ours" for project/config files to avoid merge conflicts
+.gitattributes merge=ours
+.gitignore    merge=ours
+.clang-format merge=ours
+.editorconfig merge=ours

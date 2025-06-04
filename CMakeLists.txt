@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 4.0)
 project(YAGL-Engine)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -58,7 +58,7 @@ target_link_libraries(${PROJECT_NAME}
         glm::glm
 )
 
-# Copy resources to build directory (for shaders/textures when needed)
+# For future shaders/textures when needed)
 # file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_BINARY_DIR})
 
 # CLion/MinGW specific settings

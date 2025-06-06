@@ -19,6 +19,11 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     spdlog::info("Change window size to: {}x{}", state->width, state->height);
 }
 
+void processInput(GLFWwindow *window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window, true);
+}
+
 int main()
 {
     // init GLFW
@@ -75,14 +80,19 @@ int main()
     spdlog::info("Entering main loop...");
     while (!glfwWindowShouldClose(window))
     {
+        // input
+        processInput(window);
+
+        // user pointer for framebuffer_size_callback(Change window size)
         WindowState *state = static_cast<WindowState *>(glfwGetWindowUserPointer(window));
 
         // set background color to specific color and clear the screen
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f); // dark blue background for now
         glClear(GL_COLOR_BUFFER_BIT); // clear the color buffer
 
-        glfwPollEvents(); // process pending events like keyboard or mouse input
+        // check and call events and swap buffers
         glfwSwapBuffers(window);
+        glfwPollEvents(); // process pending events like keyboard or mouse input
     }
 
     // clean up resources before exiting

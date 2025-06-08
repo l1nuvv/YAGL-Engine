@@ -1,6 +1,4 @@
 #include "core/Application.h"
-#include "core/Window.h"
-
 #include <spdlog/spdlog.h>
 
 class GameApplication: public Application

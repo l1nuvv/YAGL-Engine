@@ -8,22 +8,23 @@ AlignOperands: Align
 AllowAllArgumentsOnNextLine: false
 AllowAllConstructorInitializersOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
-AllowShortBlocksOnASingleLine: Never
+AllowShortBlocksOnASingleLine: Always
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: None
-AllowShortIfStatementsOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterReturnType: None
 AlwaysBreakTemplateDeclarations: Yes
-BreakBeforeBraces: Allman
+BreakBeforeBraces: Custom
 BraceWrapping:
     AfterCaseLabel: false
     AfterClass: false
     AfterControlStatement: Never
     AfterEnum: false
-    AfterFunction: false
+    AfterFunction: true
     AfterNamespace: false
+    AfterStruct: true
     AfterUnion: false
     BeforeCatch: false
     BeforeElse: false

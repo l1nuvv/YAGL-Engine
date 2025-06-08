@@ -6,6 +6,9 @@ out/
 # CLion IDE
 .idea/
 
+#Libraries, which added by git submodules
+.third_party/
+
 # Visual Studio / Visual Studio Code
 .vs/
 .vscode/

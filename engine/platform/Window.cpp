@@ -3,7 +3,7 @@
 //
 
 #include "Window.h"
-#include <spdlog/spdlog.h>
+#include "../util/Logger.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -20,21 +20,21 @@ void Window::Initialize(const WindowProps &props)
     m_data.vsync  = props.vsync;
 
     if (!glfwInit()) {
-        spdlog::error("Failed to initialize GLFW!");
+        LOG_ERROR("Failed to initialize GLFW!");
         return;
     }
 
     // tell GLFW what version it should use
-    spdlog::info("OpenGL version: 4.6(CORE_PROFILE).");
+    LOG_INFO("OpenGL version: 4.6(CORE_PROFILE).");
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    spdlog::info("Creating window by GLFW {}x{}...", m_data.width, m_data.height);
+    LOG_INFO("Creating window by GLFW {}x{}...", m_data.width, m_data.height);
     m_window = glfwCreateWindow(m_data.width, m_data.height, m_data.title.c_str(), nullptr, nullptr);
 
     if (!m_window) {
-        spdlog::error("Failed to create GLFW window!");
+        LOG_ERROR("Failed to create GLFW window!");
         glfwTerminate();
         return;
     }
@@ -44,20 +44,19 @@ void Window::Initialize(const WindowProps &props)
     glfwMakeContextCurrent(m_window);
 
     // load OpenGL function pointer by using GLAD
-    spdlog::info("Loading OpenGl functions by GLAD...");
+    LOG_INFO("Loading OpenGl functions by GLAD...");
     if (!gladLoadGLLoader((GLADloadproc) (glfwGetProcAddress))) {
-        spdlog::error("Failed to initialize GLAD!");
+        LOG_ERROR("Failed to initialize GLAD!");
         return;
     }
 
     // Log OpenGL info
-    spdlog::info("OpenGL Vendor: {}", (const char *) glGetString(GL_VENDOR));
-    spdlog::info("OpenGL Renderer: {}", (const char *) glGetString(GL_RENDERER));
-    spdlog::info("OpenGL Version: {}", (const char *) glGetString(GL_VERSION));
-    spdlog::info("GLSL Version: {}", (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION));
+    LOG_INFO("OpenGL Vendor: {}", (const char *) glGetString(GL_VENDOR));
+    LOG_INFO("OpenGL Renderer: {}", (const char *) glGetString(GL_RENDERER));
+    LOG_INFO("OpenGL Version: {}", (const char *) glGetString(GL_VERSION));
+    LOG_INFO("GLSL Version: {}", (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    glViewport(0, 0, m_data.width, m_data.height);
-    spdlog::debug("Viewport set to {}x{}...", m_data.width, m_data.height);
+    LOG_DEBUG("Viewport set to {}x{}...", m_data.width, m_data.height);
 
     SetVSync(m_data.vsync);
 
@@ -70,8 +69,7 @@ void Window::SetupCallbacks()
         WindowData &data = *(WindowData *) glfwGetWindowUserPointer(window);
         data.width       = width;
         data.height      = height;
-        glViewport(0, 0, width, height);
-
+        LOG_DEBUG("Framebuffer resized to {}x{}", width, height);
         if (data.resizeCallback) data.resizeCallback(width, height);
     });
 }
@@ -91,7 +89,7 @@ void Window::SetVSync(bool enabled)
 {
     glfwSwapInterval(enabled ? 1 : 0);
     m_data.vsync = enabled;
-    spdlog::info("VSync: {}", enabled ? "enabled" : "disabled");
+    LOG_INFO("VSync: {}", enabled ? "enabled" : "disabled");
 }
 
 void Window::Shutdown()

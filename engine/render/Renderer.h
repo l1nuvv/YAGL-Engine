@@ -5,7 +5,6 @@
 #pragma once
 
 #include <string>
-#include <memory>
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -20,13 +19,14 @@ public:
     void Shutdown();
 
     void Clear(const glm::vec4 &clearColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
-    void Present();
 
     void SetViewport(int width, int height);
     void SetWireframeMode(bool enabled);
 
-    GLuint CreateSahder(const std::string &vertexSource, const std::string &fragmentSource);
+    GLuint CreateShader(const std::string &vertexSource, const std::string &fragmentSource);
     void   DeleteShader(GLuint shaderProgram);
+
+    GLuint LoadShaderFromFiles(const std::string &vertexPath, const std::string &fragmentPath);
 
     GLuint CreateVAO();
     GLuint CreateVBO(const void *data, size_t size, GLenum usage = GL_STATIC_DRAW);
@@ -41,8 +41,9 @@ public:
     void CheckGLError(const std::string &operation);
 
 private:
-    GLuint CompileShader(const std::string &source, GLenum type);
-    GLuint LinkShaderProgram(GLuint vertextShader, GLuint fragmentShader);
+    GLuint      CompileShader(const std::string &source, GLenum type);
+    GLuint      LinkShaderProgram(GLuint vertextShader, GLuint fragmentShader);
+    std::string ReadFile(const std::string &path);
 
 private:
     bool m_initialized = false;

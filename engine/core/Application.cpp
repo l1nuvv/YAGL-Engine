@@ -3,26 +3,27 @@
 //
 
 #include "Application.h"
-#include "Window.h"
-#include "Input.h"
-#include <spdlog/spdlog.h>
+#include "../platform/Window.h"
+#include "../platform/Input.h"
+#include "../render/Renderer.h"
+#include "../util/Logger.h"
 #include <glm/glm.hpp>
-#include <GLFW/glfw3.h>
 
 Application *Application::s_instance = nullptr;
 
 Application::Application(int width, int height, const std::string &title)
 {
     if (s_instance) {
-        spdlog::error("Application already exists!");
+        LOG_ERROR("Application already exists!");
         return;
     }
     s_instance = this;
 
-    spdlog::info("GLM vector size for test: {}", sizeof(glm::vec3));
+    LOG_INFO("GLM vector size for test: {}", sizeof(glm::vec3));
 
     WindowProps windowProps(title, width, height, true);
-    m_window = std::make_unique<Window>(windowProps);
+    m_window   = std::make_unique<Window>(windowProps);
+    m_renderer = std::make_unique<Renderer>();
 }
 
 Application::~Application()
@@ -36,13 +37,13 @@ void Application::Run()
     InitializeEngine();
 
     if (!m_running) {
-        spdlog::error("Failed to initialize application!");
+        LOG_ERROR("Failed to initialize application!");
         return;
     }
 
-    spdlog::info("Running application...");
+    LOG_INFO("Running application...");
 
-    while (m_running && m_window && !m_window->ShouldClose()) {
+    while (m_running && !m_window->ShouldClose()) {
         CalculateDeltaTime();
 
         Input::ProcessInput();
@@ -54,8 +55,7 @@ void Application::Run()
 
         Update(m_deltaTime);
 
-        glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        m_renderer->Clear(glm::vec4(0.07f, 0.13f, 0.17f, 1.0f));
 
         Render();
 
@@ -63,21 +63,31 @@ void Application::Run()
         m_window->Update();
     }
 
-    spdlog::info("Application exiting...");
+    LOG_INFO("Application exiting...");
     ShutdownEngine();
 }
 
 void Application::InitializeEngine()
 {
     if (!m_window) {
-        spdlog::error("Window not created!");
+        LOG_ERROR("Window not created!");
         m_running = false;
         return;
     }
 
     Input::Initialize(m_window->GetNativeWindow());
 
-    m_window->SetResizeCallback([this](int width, int height) { OnWindowResize(width, height); });
+    m_window->SetResizeCallback([this](int width, int height) {
+        LOG_INFO("Window resized to {}x{}", width, height);
+        OnWindowResize(width, height);
+        if (m_renderer) { m_renderer->SetViewport(width, height); }
+    });
+
+    if (!m_renderer->Initialize()) {
+        LOG_ERROR("Failed to initialize Renderer!");
+        m_running = false;
+        return;
+    }
 
     Initialize();
 
@@ -89,7 +99,7 @@ void Application::ShutdownEngine()
 {
     Shutdown();
 
-    // if (m_renderer) m_renderer.reset();
+    if (m_renderer) m_renderer.reset();
 
     if (m_window) m_window.reset();
 

@@ -25,7 +25,7 @@ void Window::Initialize(const WindowProps &props)
     }
 
     // tell GLFW what version it should use
-    LOG_INFO("OpenGL version: 4.6(CORE_PROFILE).");
+    LOG_DEBUG("OpenGL version: 4.6(CORE_PROFILE).");
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -51,10 +51,10 @@ void Window::Initialize(const WindowProps &props)
     }
 
     // Log OpenGL info
-    LOG_INFO("OpenGL Vendor: {}", (const char *) glGetString(GL_VENDOR));
-    LOG_INFO("OpenGL Renderer: {}", (const char *) glGetString(GL_RENDERER));
-    LOG_INFO("OpenGL Version: {}", (const char *) glGetString(GL_VERSION));
-    LOG_INFO("GLSL Version: {}", (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION));
+    LOG_DEBUG("OpenGL Vendor: {}", (const char *) glGetString(GL_VENDOR));
+    LOG_DEBUG("OpenGL Renderer: {}", (const char *) glGetString(GL_RENDERER));
+    LOG_DEBUG("OpenGL Version: {}", (const char *) glGetString(GL_VERSION));
+    LOG_DEBUG("GLSL Version: {}", (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     LOG_DEBUG("Viewport set to {}x{}...", m_data.width, m_data.height);
 
@@ -78,18 +78,18 @@ void Window::Update() { glfwPollEvents(); }
 
 void Window::SwapBuffers() { glfwSwapBuffers(m_window); }
 
-bool Window::ShouldClose() const { return m_window ? glfwWindowShouldClose(m_window) : true; }
+bool Window::ShouldClose() const { return !IsWindowValid() || glfwWindowShouldClose(m_window); }
 
 void Window::SetShouldClose(bool close)
 {
-    if (m_window) glfwSetWindowShouldClose(m_window, close ? GLFW_TRUE : GLFW_FALSE);
+    if (IsWindowValid()) { glfwSetWindowShouldClose(m_window, close ? GLFW_TRUE : GLFW_FALSE); }
 }
 
 void Window::SetVSync(bool enabled)
 {
     glfwSwapInterval(enabled ? 1 : 0);
     m_data.vsync = enabled;
-    LOG_INFO("VSync: {}", enabled ? "enabled" : "disabled");
+    LOG_DEBUG("VSync: {}", enabled ? "enabled" : "disabled");
 }
 
 void Window::Shutdown()

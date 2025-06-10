@@ -10,7 +10,7 @@
 
 Renderer::Renderer() {}
 
-Renderer::~Renderer() { if (m_initialized) { Shutdown(); } }
+Renderer::~Renderer() { Shutdown(); }
 
 bool Renderer::Initialize()
 {
@@ -41,9 +41,6 @@ void Renderer::Clear(const glm::vec4 &clearColor)
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
-
-// void Renderer::Present() {}
-// In the case of double buffering, swap is executed in Window
 
 void Renderer::SetViewport(int width, int height)
 {
@@ -81,7 +78,6 @@ GLuint Renderer::CreateShader(const std::string &vertexSource, const std::string
 
 void Renderer::DeleteShader(GLuint shaderProgram)
 {
-    if (shaderProgram != 0) {}
     glDeleteProgram(shaderProgram);
     CheckGLError("DeleteShader");
 }
@@ -89,16 +85,10 @@ void Renderer::DeleteShader(GLuint shaderProgram)
 GLuint Renderer::LoadShaderFromFiles(const std::string &vertexPath, const std::string &fragmentPath)
 {
     // Логируем попытку загрузки шейдеров
-    LOG_INFO("Loading shaders: {} and {}", vertexPath, fragmentPath);
+    LOG_DEBUG("Loading shaders: {} and {}", vertexPath, fragmentPath);
 
     // Проверяем существование файлов
-    if (!std::filesystem::exists(vertexPath)) {
-        LOG_ERROR("Vertex shader file does not exist: {}", vertexPath);
-        return 0;
-    }
-
-    if (!std::filesystem::exists(fragmentPath)) {
-        LOG_ERROR("Fragment shader file does not exist: {}", fragmentPath);
+    if (!ValidateShaderFile(vertexPath, "Vertex") || !ValidateShaderFile(fragmentPath, "Fragment")) {
         return 0;
     }
 
@@ -110,7 +100,7 @@ GLuint Renderer::LoadShaderFromFiles(const std::string &vertexPath, const std::s
         return 0;
     }
 
-    LOG_INFO("Successfully loaded shader files, creating shader program...");
+    LOG_DEBUG("Successfully loaded shader files, creating shader program...");
     return CreateShader(vertexSource, fragmentSource);
 }
 
@@ -146,26 +136,20 @@ GLuint Renderer::CreateEBO(const void *data, size_t count, GLenum usage)
 
 void Renderer::DeleteVAO(GLuint VAO)
 {
-    if (VAO != 0) {
-        glDeleteVertexArrays(1, &VAO);
-        CheckGLError("Delete VAO");
-    }
+    glDeleteVertexArrays(1, &VAO);
+    CheckGLError("Delete VAO");
 }
 
 void Renderer::DeleteVBO(GLuint VBO)
 {
-    if (VBO != 0) {
-        glDeleteBuffers(1, &VBO);
-        CheckGLError("Delete VBO");
-    }
+    glDeleteBuffers(1, &VBO);
+    CheckGLError("Delete VBO");
 }
 
 void Renderer::DeleteEBO(GLuint EBO)
 {
-    if (EBO != 0) {
-        glDeleteBuffers(1, &EBO);
-        CheckGLError("Delete EBO");
-    }
+    glDeleteBuffers(1, &EBO);
+    CheckGLError("Delete EBO");
 }
 
 void Renderer::DrawArrays(GLenum mode, GLint first, GLsizei count)
@@ -263,4 +247,13 @@ std::string Renderer::ReadFile(const std::string &filepath)
     file.close();
 
     return buffer.str();
+}
+
+bool Renderer::ValidateShaderFile(const std::string &path, const std::string &shaderType)
+{
+    if (!std::filesystem::exists(path)) {
+        LOG_ERROR("{} shader file does not exist: {}", shaderType, path);
+        return false;
+    }
+    return true;
 }

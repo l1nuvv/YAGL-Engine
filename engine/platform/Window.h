@@ -26,7 +26,6 @@ struct WindowProps
 class Window
 {
 public:
-    using EventCallbackFn  = std::function<void(bool)>;
     using ResizeCallbackFn = std::function<void(int, int)>;
 
 public:
@@ -39,9 +38,9 @@ public:
     bool ShouldClose() const;
     void SetShouldClose(bool close);
 
-    int GetWidth() const { return m_data.width; }
-
-    int GetHeight() const { return m_data.height; }
+    int                 GetWidth() const { return m_data.width; }
+    int                 GetHeight() const { return m_data.height; }
+    std::pair<int, int> GetSize() const { return {m_data.width, m_data.height}; }
 
     const std::string &       GetTitle() const { return m_data.title; }
     [[nodiscard]] GLFWwindow *GetNativeWindow() const { return m_window; }
@@ -55,6 +54,7 @@ private:
     void Initialize(const WindowProps &props);
     void Shutdown();
     void SetupCallbacks();
+    bool IsWindowValid() const { return m_window != nullptr; }
 
 private:
     GLFWwindow *m_window;

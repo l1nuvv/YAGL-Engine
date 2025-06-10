@@ -20,20 +20,20 @@ public:
     void Run();
 
     virtual void Initialize() {}
-    virtual void Update(float /*deltaTime*/) {}
+    virtual void Update(float deltaTime) {}
     virtual void Render() {}
     virtual void Shutdown() {}
 
     // Event handlers
-    virtual void OnWindowResize(int /*width*/, int /*height*/) {}
-    virtual void OnKeyPressed(int /*key*/) {}
-    virtual void OnMouseMove(float /*x*/, float /*y*/) {}
+    virtual void OnWindowResize(int width, int height) {}
+    virtual void OnKeyPressed(int key) {}
+    virtual void OnMouseMove(float x, float y) {}
 
     // Getters
     Window *  GetWindow() const { return m_window.get(); }
     Renderer *GetRenderer() const { return m_renderer.get(); }
 
-    // Application instance (singleton pattern)
+    // Application instance (half-singleton)
     static Application *GetInstance() { return s_instance; }
 
 private:
@@ -51,11 +51,3 @@ private:
 
     static Application *s_instance;
 };
-
-// Macro for creating main function
-#define YAGL_MAIN(AppClass) \
-int main() { \
-auto app = std::make_unique<AppClass>(); \
-app->Run(); \
-return 0; \
-}

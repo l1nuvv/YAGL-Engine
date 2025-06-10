@@ -16,4 +16,5 @@ public:
 
 private:
     static GLFWwindow *s_window;
+    static bool        IsWindowValid();
 };

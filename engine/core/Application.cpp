@@ -19,7 +19,7 @@ Application::Application(int width, int height, const std::string &title)
     }
     s_instance = this;
 
-    LOG_INFO("GLM vector size for test: {}", sizeof(glm::vec3));
+    LOG_DEBUG("GLM vector size for test: {}", sizeof(glm::vec3));
 
     WindowProps windowProps(title, width, height, true);
     m_window   = std::make_unique<Window>(windowProps);
@@ -69,9 +69,10 @@ void Application::Run()
 
 void Application::InitializeEngine()
 {
+    m_running = false;
+
     if (!m_window) {
         LOG_ERROR("Window not created!");
-        m_running = false;
         return;
     }
 
@@ -85,7 +86,6 @@ void Application::InitializeEngine()
 
     if (!m_renderer->Initialize()) {
         LOG_ERROR("Failed to initialize Renderer!");
-        m_running = false;
         return;
     }
 

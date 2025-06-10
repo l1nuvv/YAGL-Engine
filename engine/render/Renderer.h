@@ -44,6 +44,7 @@ private:
     GLuint      CompileShader(const std::string &source, GLenum type);
     GLuint      LinkShaderProgram(GLuint vertextShader, GLuint fragmentShader);
     std::string ReadFile(const std::string &path);
+    bool        ValidateShaderFile(const std::string &path, const std::string &shaderType);
 
 private:
     bool m_initialized = false;

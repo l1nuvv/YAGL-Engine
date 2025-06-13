@@ -1,10 +1,7 @@
-//
-// Created by l1nuvv on 08.06.2025.
-//
-
 #include "TriangleApp.h"
 #include "../engine/render/Renderer.h"
 #include "../engine/util/Logger.h"
+#include "AllShaders.h" // Подключаем все встроенные шейдеры
 
 void TriangleApp::Initialize()
 {
@@ -12,31 +9,43 @@ void TriangleApp::Initialize()
 
     if (!GetRenderer()) {
         LOG_ERROR("Renderer is not initialized!");
-    }
-
-    // Попробуем разные пути к шейдерам
-    std::string vertPath = "../assets/shaders/triangle.vert";
-    std::string fragPath = "../assets/shaders/triangle.frag";
-    m_shaderProgram      = GetRenderer()->LoadShaderFromFiles(vertPath, fragPath);
-    // Если не найдены, попробуем другие пути
-    if (m_shaderProgram == 0) {
-        vertPath        = "../assets/shaders/triangle.vert";
-        fragPath        = "../assets/shaders/triangle.frag";
-        m_shaderProgram = GetRenderer()->LoadShaderFromFiles(vertPath, fragPath);
-    }
-
-    // Еще один вариант
-    if (m_shaderProgram == 0) {
-        vertPath        = "../shaders/triangle.vert";
-        fragPath        = "../shaders/triangle.frag";
-        m_shaderProgram = GetRenderer()->LoadShaderFromFiles(vertPath, fragPath);
-    }
-
-    if (m_shaderProgram == 0) {
-        LOG_ERROR("Failed to load shaders from any path");
         return;
     }
 
+    // Сначала пробуем использовать встроенные шейдеры (для релиза)
+    m_shaderProgram = GetRenderer()->CreateShader(
+            EmbeddedShaders::TRIANGLE_VERTEX_SHADER,
+            EmbeddedShaders::TRIANGLE_FRAGMENT_SHADER
+            );
+
+    if (m_shaderProgram != 0) {
+        LOG_INFO("Successfully loaded embedded shaders!");
+    } else {
+        // Fallback на файлы для разработки
+        LOG_WARN("Failed to load embedded shaders, trying file paths...");
+
+        std::vector<std::pair<std::string, std::string>> shaderPaths = {
+                {"assets/shaders/triangle.vert", "assets/shaders/triangle.frag"},
+                {"../assets/shaders/triangle.vert", "../assets/shaders/triangle.frag"},
+                {"shaders/triangle.vert", "shaders/triangle.frag"},
+                {"./shaders/triangle.vert", "./shaders/triangle.frag"}
+        };
+
+        for (const auto &paths: shaderPaths) {
+            m_shaderProgram = GetRenderer()->LoadShaderFromFiles(paths.first, paths.second);
+            if (m_shaderProgram != 0) {
+                LOG_INFO("Loaded shaders from: {} and {}", paths.first, paths.second);
+                break;
+            }
+        }
+    }
+
+    if (m_shaderProgram == 0) {
+        LOG_ERROR("Failed to load shaders from any source");
+        return;
+    }
+
+    // Создаем треугольник
     float vertices[] = {
             -0.5f, -0.5f, 0.0f,
             0.5f, -0.5f, 0.0f,

@@ -9,6 +9,7 @@ int main()
     LOG_INFO("Starting YAGL Engine with Triangle Demo...");
 
     auto app = std::make_unique<TriangleApp>();
+    // Основной цикл приложения
     app->Run();
 
     LOG_INFO("Application finished successfully!");

@@ -6,15 +6,19 @@
 
 #include <GLFW/glfw3.h>
 
+/**
+ * Статический класс для управления пользовательским вводом
+ */
+
 class Input
 {
 public:
-    static void Initialize(GLFWwindow *window);
-    static void ProcessInput();
-    static bool IsKeyPressed(int key);
-    static bool ShouldClose();
+    static void Initialize(GLFWwindow *window); // Инициализация ввода привязкой к окну
+    static void ProcessInput();                 // Обработка базовых событий ввода каждый кадр
+    static bool IsKeyPressed(int key);          // Проверка нажатия конкретной клавиши
+    static bool ShouldClose();                  // Проверка запроса на закрытие приложения
 
 private:
-    static GLFWwindow *s_window;
-    static bool        IsWindowValid();
+    static GLFWwindow *s_window;        // Указатель на GLFW окно для получения состояние ввода
+    static bool        IsWindowValid(); // Проверка валидности окна перед обращением к GLFW функциям
 };

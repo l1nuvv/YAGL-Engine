@@ -50,10 +50,7 @@ void Renderer::SetViewport(int width, int height)
 
 void Renderer::SetWireframeMode(bool enabled)
 {
-    if (enabled)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    else
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, enabled ? GL_FILL : GL_LINE);
     CheckGLError("SetWireframeMode");
 }
 

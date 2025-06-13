@@ -4,6 +4,9 @@
 
 #pragma once
 
+#ifndef RENDERER_H
+#define RENDERER_H
+
 #include <string>
 
 #include <glad/glad.h>
@@ -72,3 +75,4 @@ private:
 private:
     bool m_initialized = false; // Флаг успешной инициализации рендера
 };
+#endif // RENDERER_H

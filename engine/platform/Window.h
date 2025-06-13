@@ -4,6 +4,9 @@
 
 #pragma once
 
+#ifndef WINDOW_H
+#define WINDOW_H
+
 #include <string>
 #include <functional>
 
@@ -90,3 +93,4 @@ private:
 
     WindowData m_data;
 };
+#endif  // WINDOW_H

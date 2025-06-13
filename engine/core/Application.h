@@ -3,6 +3,9 @@
 //
 #pragma once
 
+#ifndef APPLICATION_H
+#define APPLICATION_H
+
 #include "glad/glad.h"
 #include <memory>
 #include <string>
@@ -61,3 +64,4 @@ private:
     // Singleton instance - статический указатель на единственный экземпляр
     static Application *s_instance;
 };
+#endif // APPLICATION_H

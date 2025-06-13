@@ -4,6 +4,9 @@
 
 #pragma once
 
+#ifndef INPUT_H
+#define INPUT_H
+
 #include <GLFW/glfw3.h>
 
 /**
@@ -22,3 +25,4 @@ private:
     static GLFWwindow *s_window;        // Указатель на GLFW окно для получения состояние ввода
     static bool        IsWindowValid(); // Проверка валидности окна перед обращением к GLFW функциям
 };
+#endif // INPUT_H

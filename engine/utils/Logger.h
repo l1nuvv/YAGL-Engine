@@ -1,4 +1,8 @@
 #pragma once
+
+#ifndef LOGGER_H
+#define LOGGER_H
+
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <memory>
@@ -18,3 +22,4 @@ namespace Logger {
 #else
 #define LOG_DEBUG(...) // No-op in release builds
 #endif
+#endif  // LOGGER_H

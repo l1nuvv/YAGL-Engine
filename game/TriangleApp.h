@@ -4,6 +4,9 @@
 
 #pragma once
 
+#ifndef TRIANGLEAPP_H
+#define TRIANGLEAPP_H
+
 #include "../engine/core/Application.h"
 
 class TriangleApp: public Application
@@ -20,3 +23,4 @@ private:
     GLuint m_VAO           = 0;
     GLuint m_VBO           = 0;
 };
+#endif // TRIANGLEAPP_H

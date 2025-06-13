@@ -4,7 +4,7 @@
 
 #include "Input.h"
 
-#include "util/Logger.h"
+#include "utils/Logger.h"
 
 GLFWwindow *Input::s_window = nullptr;
 

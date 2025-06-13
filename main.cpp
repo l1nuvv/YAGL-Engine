@@ -1,5 +1,5 @@
 #include "game/TriangleApp.h"
-#include "engine/util/Logger.h"
+#include "engine/utils/Logger.h"
 
 int main()
 {

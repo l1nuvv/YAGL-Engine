@@ -6,7 +6,7 @@
 #include "../platform/Window.h"
 #include "../platform/Input.h"
 #include "../render/Renderer.h"
-#include "../util/Logger.h"
+#include "../utils/Logger.h"
 #include <glm/glm.hpp>
 
 Application *Application::s_instance = nullptr;

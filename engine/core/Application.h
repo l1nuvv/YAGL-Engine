@@ -26,14 +26,14 @@ public:
     // Виртуальные методы для переопределения в наследниках
     // Позволяют кастомизировать поведение без изменения основной логики
     virtual void Initialize() {}
-    virtual void Update(float deltaTime) {}
+    virtual void Update(float /*deltaTime*/) {}
     virtual void Render() {}
     virtual void Shutdown() {}
 
     // Обработчики событий - реагируют на действия пользователя
-    virtual void OnWindowResize(int width, int height) {}
-    virtual void OnKeyPressed(int key) {}
-    virtual void OnMouseMove(float x, float y) {}
+    virtual void OnWindowResize(int /*width*/, int /*height*/) {}
+    virtual void OnKeyPressed(int /*key*/) {}
+    virtual void OnMouseMove(float /*x*/, float /*y*/) {}
 
     // Геттеры - дают доступ к внутренним компонентам
     Window *  GetWindow() const { return m_window.get(); }

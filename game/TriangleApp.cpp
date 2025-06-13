@@ -1,7 +1,8 @@
 #include "TriangleApp.h"
 #include "../engine/render/Renderer.h"
-#include "../engine/util/Logger.h"
+#include "../engine/utils/Logger.h"
 #include "AllShaders.h" // Подключаем все встроенные шейдеры
+#include "GLFW/glfw3.h"
 
 void TriangleApp::Initialize()
 {
@@ -46,10 +47,11 @@ void TriangleApp::Initialize()
     }
 
     // Создаем треугольник
-    float vertices[] = {
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.0f, 0.5f, 0.0f
+    GLfloat vertices[] = {
+            // Позиции         // Цвета
+            0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // Bottom Right
+            -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom Left
+            0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f    // Top
     };
 
     m_VAO = GetRenderer()->CreateVAO();
@@ -58,8 +60,13 @@ void TriangleApp::Initialize()
     glBindVertexArray(m_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *) 0);
+    // Аттрибут с координатами
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *) 0);
     glEnableVertexAttribArray(0);
+
+    // Аттрибут с цветом
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *) (3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -72,6 +79,12 @@ void TriangleApp::Render()
     if (m_shaderProgram == 0 || m_VAO == 0) return;
 
     glUseProgram(m_shaderProgram);
+
+    GLfloat timeValue           = glfwGetTime();
+    GLfloat greenValue          = (sin(timeValue) / 2.0f) + 0.5f;
+    GLint   vertexColorLocation = glGetUniformLocation(m_shaderProgram, "ourColor");
+    glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
     glBindVertexArray(m_VAO);
     GetRenderer()->DrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);

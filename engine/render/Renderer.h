@@ -30,7 +30,7 @@ public:
     // Очистка экрана указанным цветом перед отрисовкой нового кадра
     void Clear(const glm::vec4 &clearColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
 
-    // Уставнока области отрисовки
+    // Установка области отрисовки
     // Нужно для изменения размера окна
     void SetViewport(int width, int height);
     // Переключение между заливкой и Wireframe режимами отрисовки
@@ -43,6 +43,9 @@ public:
 
     // Загрузка шейдеров из файлов
     GLuint LoadShaderFromFiles(const std::string &vertexPath, const std::string &fragmentPath);
+
+    // Смена цвета объекта с заданного на черный и обратно
+    void AnimateColorPulse(GLuint shaderProgram, const glm::vec3 &baseColor, GLfloat speed = 1.0f);
 
     // создание OpenGL объектов для управления данными вершин
     // Vertex Array Object - описание структуры вершин

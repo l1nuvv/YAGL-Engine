@@ -4,6 +4,8 @@
 
 #include "Renderer.h"
 #include "../utils/Logger.h"
+#include "GLFW/glfw3.h"
+
 #include <fstream>
 #include <sstream>
 #include <filesystem>
@@ -99,6 +101,21 @@ GLuint Renderer::LoadShaderFromFiles(const std::string &vertexPath, const std::s
 
     LOG_DEBUG("Successfully loaded shader files, creating shader program...");
     return CreateShader(vertexSource, fragmentSource);
+}
+
+// Объект меняет цвет с заданного на черный и обратно
+void Renderer::AnimateColorPulse(GLuint shaderProgram, const glm::vec3 &baseColor, GLfloat speed)
+{
+    GLfloat timeValue = glfwGetTime() * speed;
+    GLfloat intensity = 0.5f * (1.0f + sin(timeValue * speed));
+
+    glm::vec3 dynamicColor        = baseColor * intensity;
+    GLint     vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+    glUniform4f(vertexColorLocation,
+                dynamicColor.r,
+                dynamicColor.g,
+                dynamicColor.b,
+                1.0f);
 }
 
 GLuint Renderer::CreateVAO()

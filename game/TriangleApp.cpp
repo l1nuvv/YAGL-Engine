@@ -55,6 +55,13 @@ void TriangleApp::Initialize()
 
     };
 
+    /*GLfloat texCoords[] = {
+            0.0f, 0.0f,
+            1.0f, 0.0f,
+            0.5f, 1.0f
+    };*/
+
+
     m_VAO = GetRenderer()->CreateVAO();
     m_VBO = GetRenderer()->CreateVBO(vertices, sizeof(vertices));
 
@@ -66,8 +73,8 @@ void TriangleApp::Initialize()
     glEnableVertexAttribArray(0);
 
     // Аттрибут с цветом
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *) (3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *) (3 * sizeof(GLfloat)));
+    //glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -80,11 +87,13 @@ void TriangleApp::Render()
     if (m_shaderProgram == 0 || m_VAO == 0) return;
 
     glUseProgram(m_shaderProgram);
+    // Смена цвета треугольника
+    GetRenderer()->AnimateColorPulse(m_shaderProgram, glm::vec3(0.7f, 0.2f, 0.7f), 1.5f);
 
-    GLfloat timeValue           = glfwGetTime();
-    GLfloat greenValue          = (sin(timeValue) / 2.0f) + 0.5f;
-    GLint   vertexColorLocation = glGetUniformLocation(m_shaderProgram, "ourColor");
-    glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+    // Сдвиг отрисованного объекта
+    GLfloat xOffset       = 0.5f;
+    GLint   vertexXOffset = glGetUniformLocation(m_shaderProgram, "rightPos");
+    glUniform1f(vertexXOffset, xOffset);
 
     glBindVertexArray(m_VAO);
     GetRenderer()->DrawArrays(GL_TRIANGLES, 0, 3);

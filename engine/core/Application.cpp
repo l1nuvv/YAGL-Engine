@@ -67,7 +67,7 @@ void Application::Run()
         Update(m_deltaTime);
 
         // Очистка буфера кадра перед следующей отрисовкой
-        m_renderer->Clear(glm::vec4(0.07f, 0.13f, 0.17f, 1.0f));
+        m_renderer->Clear(glm::vec4(0.5f, 0.54f, 1.0f, 1.0f));
 
         // Выполнение отрисовки сцены
         Render();

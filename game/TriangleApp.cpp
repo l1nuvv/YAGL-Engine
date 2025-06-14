@@ -88,7 +88,7 @@ void TriangleApp::Render()
 
     glUseProgram(m_shaderProgram);
     // Смена цвета треугольника
-    GetRenderer()->AnimateColorPulse(m_shaderProgram, glm::vec3(0.7f, 0.2f, 0.7f), 1.5f);
+    GetRenderer()->AnimateColorPulse(m_shaderProgram, glm::vec3(1.0f, 0.7f, 0.5f), 1.5f);
 
     // Сдвиг отрисованного объекта
     GLfloat xOffset       = 0.5f;

@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include "../utils/Logger.h"
 #include "GLFW/glfw3.h"
+#include "glm/gtc/type_ptr.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -52,7 +53,7 @@ void Renderer::SetViewport(int width, int height)
 
 void Renderer::SetWireframeMode(bool enabled)
 {
-    glPolygonMode(GL_FRONT_AND_BACK, enabled ? GL_FILL : GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, enabled ? GL_LINE : GL_FILL);
     CheckGLError("SetWireframeMode");
 }
 
@@ -118,6 +119,18 @@ void Renderer::AnimateColorPulse(GLuint shaderProgram, const glm::vec3 &baseColo
                 1.0f);
 }
 
+void Renderer::SetShaderGradient(GLuint shaderProgram, const glm::vec3 &colorStart, const glm::vec3 &colorEnd,
+                                 float  speed)
+{
+    GLint timeLocation  = glGetUniformLocation(shaderProgram, "time");
+    GLint startLocation = glGetUniformLocation(shaderProgram, "colorStart");
+    GLint endLocation   = glGetUniformLocation(shaderProgram, "colorEnd");
+
+    glUniform1f(timeLocation, glfwGetTime() * speed);
+    glUniform3f(startLocation, colorStart.r, colorStart.g, colorStart.b);
+    glUniform3f(endLocation, colorEnd.r, colorEnd.g, colorEnd.b);
+}
+
 GLuint Renderer::CreateVAO()
 {
     GLuint VAO = 0;
@@ -146,6 +159,35 @@ GLuint Renderer::CreateEBO(const void *data, size_t count, GLenum usage)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     CheckGLError("Create EBO");
     return EBO;
+}
+
+void Renderer::SetModelMatrix(GLuint shaderProgram, const glm::mat4 &model)
+{
+    GLint modelLocation = glGetUniformLocation(shaderProgram, "model");
+    if (modelLocation != -1) { glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model)); }
+    CheckGLError("SetModelMatrix");
+}
+
+void Renderer::SetViewMatrix(GLuint shaderProgram, const glm::mat4 &view)
+{
+    GLint viewLocation = glGetUniformLocation(shaderProgram, "view");
+    if (viewLocation != -1) { glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view)); }
+    CheckGLError("SetViewMatrix");
+}
+
+void Renderer::SetProjectionMatrix(GLuint shaderProgram, const glm::mat4 &projection)
+{
+    GLint projectionLocation = glGetUniformLocation(shaderProgram, "projection");
+    if (projectionLocation != -1) { glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection)); }
+    CheckGLError("SetProjectionMatrix");
+}
+
+void Renderer::SetMVPMatrices(GLuint           shaderProgram, const glm::mat4 &model, const glm::mat4 &view,
+                              const glm::mat4 &projection)
+{
+    SetModelMatrix(shaderProgram, model);
+    SetViewMatrix(shaderProgram, view);
+    SetProjectionMatrix(shaderProgram, projection);
 }
 
 void Renderer::DeleteVAO(GLuint VAO)

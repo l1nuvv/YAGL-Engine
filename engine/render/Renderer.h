@@ -45,7 +45,10 @@ public:
     GLuint LoadShaderFromFiles(const std::string &vertexPath, const std::string &fragmentPath);
 
     // Смена цвета объекта с заданного на черный и обратно
-    void AnimateColorPulse(GLuint shaderProgram, const glm::vec3 &baseColor, GLfloat speed = 1.0f);
+    void AnimateColorPulse(GLuint shaderProgram, const glm::vec3 &baseColor, float speed);
+
+    // Смена цвета объекта градиентом
+    void SetShaderGradient(GLuint shaderProgram, const glm::vec3 &colorStart, const glm::vec3 &colorEnd, float speed);
 
     // создание OpenGL объектов для управления данными вершин
     // Vertex Array Object - описание структуры вершин
@@ -55,7 +58,14 @@ public:
     // Element Buffer Object - хранение индекса вершин
     GLuint CreateEBO(const void *data, size_t count, GLenum usage = GL_STATIC_DRAW);
 
+    void SetModelMatrix(GLuint shaderProgram, const glm::mat4 &model);
+    void SetViewMatrix(GLuint shaderProgram, const glm::mat4 &view);
+    void SetProjectionMatrix(GLuint shaderProgram, const glm::mat4 &projection);
+    void SetMVPMatrices(GLuint           shaderProgram, const glm::mat4 &model, const glm::mat4 &view,
+                        const glm::mat4 &projection);
+
     // Освобождение OpenGL объектов
+
     void DeleteVAO(GLuint vao);
     void DeleteVBO(GLuint vbo);
     void DeleteEBO(GLuint ebo);

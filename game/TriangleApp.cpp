@@ -3,6 +3,8 @@
 #include "../engine/utils/Logger.h"
 #include "AllShaders.h" // Подключаем все встроенные шейдеры
 #include "GLFW/glfw3.h"
+#include "glm/gtc/type_ptr.hpp"
+#include "render/TransformManager.h"
 
 void TriangleApp::Initialize()
 {
@@ -87,8 +89,26 @@ void TriangleApp::Render()
     if (m_shaderProgram == 0 || m_VAO == 0) return;
 
     glUseProgram(m_shaderProgram);
-    // Смена цвета треугольника
-    GetRenderer()->AnimateColorPulse(m_shaderProgram, glm::vec3(1.0f, 0.7f, 0.5f), 1.5f);
+
+    // Создаем матрицы преобразования и вращение треугольника
+    glm::mat4 model = TransformManager::CreateRotatingModel(glfwGetTime(), 1.0f); // Единичная матрица
+
+    glm::mat4 view = TransformManager::CreateViewMatrix(
+            glm::vec3(0.0f, 0.0f, 3.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f)
+            );
+
+    glm::mat4 projection = TransformManager::CreateProjectionMatrix(45.0f, 800.0f / 600.0f);
+
+    // Смена цвета треугольника синусоидой
+    //GetRenderer()->AnimateColorPulse(m_shaderProgram, glm::vec3(1.0f, 0.7f, 0.5f), 1.5f);
+
+    // Передача всех матриц одним вызовом
+    GetRenderer()->SetMVPMatrices(m_shaderProgram, model, view, projection);
+
+    // Градиент на треугольнике
+    GetRenderer()->SetShaderGradient(m_shaderProgram, glm::vec3(1.0f, 0.7f, 0.5f),
+                                     glm::vec3(0.3f, 0.8f, 1.0f), 1.0f);
 
     // Сдвиг отрисованного объекта
     GLfloat xOffset       = 0.5f;

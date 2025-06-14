@@ -3,8 +3,8 @@ project(YAGL-Engine)
 
 # Подавляем предупреждение о неиспользуемых переменных vcpkg
 if (DEFINED VCPKG_TARGET_TRIPLET)
-    set(_unused_var ${VCPKG_TARGET_TRIPLET})
-    unset(_unused_var)
+  set(_unused_var ${VCPKG_TARGET_TRIPLET})
+  unset(_unused_var)
 endif ()
 
 set(CMAKE_CXX_STANDARD 20)
@@ -12,9 +12,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Compiler warnings
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-    add_compile_options(-Wall -Wextra)
+  add_compile_options(-Wall -Wextra)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    add_compile_options(/W4)
+  add_compile_options(/W4)
 endif ()
 
 # GLFW build settings
@@ -38,25 +38,25 @@ set(GLM_BUILD_INSTALL OFF CACHE BOOL "" FORCE)
 
 # ====== Shader Embedding Function ======
 function(embed_shader SHADER_FILE OUTPUT_FILE VARIABLE_NAME)
-    file(READ ${SHADER_FILE} SHADER_CONTENT)
+  file(READ ${SHADER_FILE} SHADER_CONTENT)
 
-    # Экранируем специальные символы для C++ строки
-    string(REPLACE "\\" "\\\\" SHADER_CONTENT "${SHADER_CONTENT}")
-    string(REPLACE "\"" "\\\"" SHADER_CONTENT "${SHADER_CONTENT}")
-    string(REPLACE "\r\n" "\n" SHADER_CONTENT "${SHADER_CONTENT}")
-    string(REPLACE "\n" "\\n\"\n\"" SHADER_CONTENT "${SHADER_CONTENT}")
+  # Экранируем специальные символы для C++ строки
+  string(REPLACE "\\" "\\\\" SHADER_CONTENT "${SHADER_CONTENT}")
+  string(REPLACE "\"" "\\\"" SHADER_CONTENT "${SHADER_CONTENT}")
+  string(REPLACE "\r\n" "\n" SHADER_CONTENT "${SHADER_CONTENT}")
+  string(REPLACE "\n" "\\n\"\n\"" SHADER_CONTENT "${SHADER_CONTENT}")
 
-    # Генерируем header файл
-    file(WRITE ${OUTPUT_FILE}
-            "#pragma once\n\n"
-            "// Auto-generated from ${SHADER_FILE}\n"
-            "// Do not modify this file manually!\n\n"
-            "namespace EmbeddedShaders {\n"
-            "    constexpr const char* ${VARIABLE_NAME} = \"${SHADER_CONTENT}\";\n"
-            "}\n"
-    )
+  # Генерируем header файл
+  file(WRITE ${OUTPUT_FILE}
+          "#pragma once\n\n"
+          "// Auto-generated from ${SHADER_FILE}\n"
+          "// Do not modify this file manually!\n\n"
+          "namespace EmbeddedShaders {\n"
+          "    constexpr const char* ${VARIABLE_NAME} = \"${SHADER_CONTENT}\";\n"
+          "}\n"
+  )
 
-    message(STATUS "Generated embedded shader: ${OUTPUT_FILE}")
+  message(STATUS "Generated embedded shader: ${OUTPUT_FILE}")
 endfunction()
 
 # ====== Third-party ======
@@ -64,15 +64,19 @@ add_subdirectory(third_party/glfw)
 add_subdirectory(third_party/glm)
 add_subdirectory(third_party/spdlog)
 
+#stb_image
+add_library(stb_image INTERFACE)
+target_include_directories(stb_image INTERFACE third_party/stb)
+
 # GLAD
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/CMakeLists.txt")
-    add_subdirectory(third_party/glad)
-    set(GLAD_LIBRARIES glad)
+  add_subdirectory(third_party/glad)
+  set(GLAD_LIBRARIES glad)
 else ()
-    file(GLOB GLAD_SOURCES "third_party/glad/src/*.c")
-    add_library(glad STATIC ${GLAD_SOURCES})
-    target_include_directories(glad PUBLIC third_party/glad/include)
-    set(GLAD_LIBRARIES glad)
+  file(GLOB GLAD_SOURCES "third_party/glad/src/*.c")
+  add_library(glad STATIC ${GLAD_SOURCES})
+  target_include_directories(glad PUBLIC third_party/glad/include)
+  set(GLAD_LIBRARIES glad)
 endif ()
 
 # ====== Generate Embedded Shaders ======
@@ -88,14 +92,14 @@ set(SHADER_SEARCH_PATHS
 
 set(SHADER_SOURCE_DIR "")
 foreach (SEARCH_PATH ${SHADER_SEARCH_PATHS})
-    if (EXISTS "${SEARCH_PATH}")
-        set(SHADER_SOURCE_DIR ${SEARCH_PATH})
-        break()
-    endif ()
+  if (EXISTS "${SEARCH_PATH}")
+    set(SHADER_SOURCE_DIR ${SEARCH_PATH})
+    break()
+  endif ()
 endforeach ()
 
 if (NOT SHADER_SOURCE_DIR)
-    message(FATAL_ERROR "Shader directory not found! Searched in: ${SHADER_SEARCH_PATHS}")
+  message(FATAL_ERROR "Shader directory not found! Searched in: ${SHADER_SEARCH_PATHS}")
 endif ()
 
 message(STATUS "Using shader directory: ${SHADER_SOURCE_DIR}")
@@ -107,23 +111,23 @@ file(GLOB FRAGMENT_SHADERS "${SHADER_SOURCE_DIR}/*.frag")
 set(GENERATED_SHADER_HEADERS "")
 
 foreach (SHADER_FILE ${VERTEX_SHADERS})
-    get_filename_component(SHADER_NAME ${SHADER_FILE} NAME_WE)
-    string(TOUPPER ${SHADER_NAME} SHADER_NAME_UPPER)
-    set(OUTPUT_FILE "${GENERATED_SHADERS_DIR}/${SHADER_NAME}_vert.h")
-    set(VARIABLE_NAME "${SHADER_NAME_UPPER}_VERTEX_SHADER")
+  get_filename_component(SHADER_NAME ${SHADER_FILE} NAME_WE)
+  string(TOUPPER ${SHADER_NAME} SHADER_NAME_UPPER)
+  set(OUTPUT_FILE "${GENERATED_SHADERS_DIR}/${SHADER_NAME}_vert.h")
+  set(VARIABLE_NAME "${SHADER_NAME_UPPER}_VERTEX_SHADER")
 
-    embed_shader(${SHADER_FILE} ${OUTPUT_FILE} ${VARIABLE_NAME})
-    list(APPEND GENERATED_SHADER_HEADERS ${OUTPUT_FILE})
+  embed_shader(${SHADER_FILE} ${OUTPUT_FILE} ${VARIABLE_NAME})
+  list(APPEND GENERATED_SHADER_HEADERS ${OUTPUT_FILE})
 endforeach ()
 
 foreach (SHADER_FILE ${FRAGMENT_SHADERS})
-    get_filename_component(SHADER_NAME ${SHADER_FILE} NAME_WE)
-    string(TOUPPER ${SHADER_NAME} SHADER_NAME_UPPER)
-    set(OUTPUT_FILE "${GENERATED_SHADERS_DIR}/${SHADER_NAME}_frag.h")
-    set(VARIABLE_NAME "${SHADER_NAME_UPPER}_FRAGMENT_SHADER")
+  get_filename_component(SHADER_NAME ${SHADER_FILE} NAME_WE)
+  string(TOUPPER ${SHADER_NAME} SHADER_NAME_UPPER)
+  set(OUTPUT_FILE "${GENERATED_SHADERS_DIR}/${SHADER_NAME}_frag.h")
+  set(VARIABLE_NAME "${SHADER_NAME_UPPER}_FRAGMENT_SHADER")
 
-    embed_shader(${SHADER_FILE} ${OUTPUT_FILE} ${VARIABLE_NAME})
-    list(APPEND GENERATED_SHADER_HEADERS ${OUTPUT_FILE})
+  embed_shader(${SHADER_FILE} ${OUTPUT_FILE} ${VARIABLE_NAME})
+  list(APPEND GENERATED_SHADER_HEADERS ${OUTPUT_FILE})
 endforeach ()
 
 # Создаем общий header файл со всеми шейдерами
@@ -135,8 +139,8 @@ file(WRITE ${ALL_SHADERS_HEADER}
 )
 
 foreach (HEADER ${GENERATED_SHADER_HEADERS})
-    get_filename_component(HEADER_NAME ${HEADER} NAME)
-    file(APPEND ${ALL_SHADERS_HEADER} "#include \"${HEADER_NAME}\"\n")
+  get_filename_component(HEADER_NAME ${HEADER} NAME)
+  file(APPEND ${ALL_SHADERS_HEADER} "#include \"${HEADER_NAME}\"\n")
 endforeach ()
 
 # ====== Engine (Static library) ======
@@ -166,6 +170,7 @@ target_link_libraries(yagl_engine
         ${GLAD_LIBRARIES}
         glm::glm
         spdlog::spdlog
+        stb_image
 )
 
 # ====== Game (Executable) ======
@@ -192,11 +197,11 @@ add_dependencies(${PROJECT_NAME} yagl_engine)
 
 # ====== Copy Shaders (для разработки) ======
 if (EXISTS "${CMAKE_SOURCE_DIR}/shaders")
-    file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})
-    message(STATUS "Copying shaders from ${CMAKE_SOURCE_DIR}/shaders to ${CMAKE_BINARY_DIR}/shaders")
+  file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})
+  message(STATUS "Copying shaders from ${CMAKE_SOURCE_DIR}/shaders to ${CMAKE_BINARY_DIR}/shaders")
 endif ()
 
 # ====== MinGW static linking ======
 if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_link_libraries(${PROJECT_NAME} -static-libgcc -static-libstdc++)
+  target_link_libraries(${PROJECT_NAME} -static-libgcc -static-libstdc++)
 endif ()

@@ -36,14 +36,6 @@ public:
     // Переключение между заливкой и Wireframe режимами отрисовки
     void SetWireframeMode(bool enabled);
 
-    // Создание шейдерной программы из вершинного и фрагментного шейдеров
-    GLuint CreateShader(const std::string &vertexSource, const std::string &fragmentSource);
-    // Удаление текущей шейдерной программы для освобождения видеопамяти
-    void DeleteShader(GLuint shaderProgram);
-
-    // Загрузка шейдеров из файлов
-    GLuint LoadShaderFromFiles(const std::string &vertexPath, const std::string &fragmentPath);
-
     // Смена цвета объекта с заданного на черный и обратно
     void AnimateColorPulse(GLuint shaderProgram, const glm::vec3 &baseColor, float speed);
 

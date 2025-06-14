@@ -57,53 +57,6 @@ void Renderer::SetWireframeMode(bool enabled)
     CheckGLError("SetWireframeMode");
 }
 
-GLuint Renderer::CreateShader(const std::string &vertexSource, const std::string &fragmentSource)
-{
-    GLuint vertexShader = CompileShader(vertexSource, GL_VERTEX_SHADER);
-    if (vertexShader == 0) return 0;
-
-    GLuint fragmentShader = CompileShader(fragmentSource, GL_FRAGMENT_SHADER);
-    if (fragmentShader == 0) {
-        glDeleteShader(vertexShader);
-        return 0;
-    }
-
-    GLuint program = LinkShaderProgram(vertexShader, fragmentShader);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    return program;
-}
-
-void Renderer::DeleteShader(GLuint shaderProgram)
-{
-    glDeleteProgram(shaderProgram);
-    CheckGLError("DeleteShader");
-}
-
-GLuint Renderer::LoadShaderFromFiles(const std::string &vertexPath, const std::string &fragmentPath)
-{
-    // Логируем попытку загрузки шейдеров
-    LOG_DEBUG("Loading shaders: {} and {}", vertexPath, fragmentPath);
-
-    // Проверяем существование файлов
-    if (!ValidateShaderFile(vertexPath, "Vertex") || !ValidateShaderFile(fragmentPath, "Fragment")) {
-        return 0;
-    }
-
-    std::string vertexSource   = ReadFile(vertexPath);
-    std::string fragmentSource = ReadFile(fragmentPath);
-
-    if (vertexSource.empty() || fragmentSource.empty()) {
-        LOG_ERROR("Failed to read shader files: {} or {}", vertexPath, fragmentPath);
-        return 0;
-    }
-
-    LOG_DEBUG("Successfully loaded shader files, creating shader program...");
-    return CreateShader(vertexSource, fragmentSource);
-}
-
 // Объект меняет цвет с заданного на черный и обратно
 void Renderer::AnimateColorPulse(GLuint shaderProgram, const glm::vec3 &baseColor, GLfloat speed)
 {
@@ -244,50 +197,6 @@ void Renderer::CheckGLError(const std::string &operation)
         }
         LOG_ERROR("OpenGL Error in {}: {} ({})", operation, message, error);
     }
-}
-
-GLuint Renderer::CompileShader(const std::string &source, GLenum type)
-{
-    GLuint      shader = glCreateShader(type);
-    const char *src    = source.c_str();
-    glShaderSource(shader, 1, &src, nullptr);
-    glCompileShader(shader);
-
-    GLint success;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        GLchar infoLog[512];
-        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-
-        std::string shaderType = (type == GL_VERTEX_SHADER) ? "Vertex" : "Fragment";
-        LOG_ERROR("{} shader compilation failed: {}", shaderType, infoLog);
-
-        glDeleteShader(shader);
-        return 0;
-    }
-
-    return shader;
-}
-
-GLuint Renderer::LinkShaderProgram(GLuint vertexShader, GLuint fragmentShader)
-{
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-    glLinkProgram(program);
-
-    GLint success;
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
-    if (!success) {
-        GLchar infoLog[512];
-        glGetProgramInfoLog(program, 512, nullptr, infoLog);
-        LOG_ERROR("Shader program linking failed: {}", infoLog);
-
-        glDeleteProgram(program);
-        return 0;
-    }
-
-    return program;
 }
 
 std::string Renderer::ReadFile(const std::string &filepath)

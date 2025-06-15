@@ -199,26 +199,3 @@ void Renderer::CheckGLError(const std::string &operation)
     }
 }
 
-std::string Renderer::ReadFile(const std::string &filepath)
-{
-    std::ifstream file(filepath);
-    if (!file.is_open()) {
-        LOG_ERROR("Failed to open file {}", filepath);
-        return "";
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    file.close();
-
-    return buffer.str();
-}
-
-bool Renderer::ValidateShaderFile(const std::string &path, const std::string &shaderType)
-{
-    if (!std::filesystem::exists(path)) {
-        LOG_ERROR("{} shader file does not exist: {}", shaderType, path);
-        return false;
-    }
-    return true;
-}

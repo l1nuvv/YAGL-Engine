@@ -20,9 +20,6 @@ Application::Application(int width, int height, const std::string &title)
     }
     s_instance = this;
 
-    // Проверка работы GLM
-    LOG_DEBUG("GLM vector size for test: {}", sizeof(glm::vec3));
-
     // Создание основных компонентов движка в правильном порядке
     WindowProps windowProps(title, width, height, true);
     m_window   = std::make_unique<Window>(windowProps);

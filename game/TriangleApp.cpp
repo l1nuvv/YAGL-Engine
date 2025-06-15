@@ -16,9 +16,6 @@ void TriangleApp::Initialize()
         return;
     }
 
-    // =============================================
-    // ИНТЕГРАЦИЯ RESOURCE MANAGER: ЗАГРУЗКА ШЕЙДЕРА
-    // =============================================
     // Пытаемся использовать встроенные шейдеры через ResourceManager
     m_shaderProgram = RESOURCE_MANAGER.LoadShader(
             "triangle_shader", // Уникальное имя для кэширования
@@ -66,7 +63,7 @@ void TriangleApp::Initialize()
     }
 
     // =============================================
-    // СОЗДАНИЕ ГЕОМЕТРИИ ТРЕУГОЛЬНИКА (без изменений)
+    // СОЗДАНИЕ ГЕОМЕТРИИ ТРЕУГОЛЬНИКА
     // =============================================
     GLfloat vertices[] = {
             // Позиции         // Цвета
@@ -99,9 +96,6 @@ void TriangleApp::Render()
 {
     if (m_shaderProgram == 0 || m_VAO == 0) return;
 
-    // =============================================
-    // ИСПОЛЬЗОВАНИЕ ШЕЙДЕРА ИЗ RESOURCE MANAGER
-    // =============================================
     glUseProgram(m_shaderProgram);
 
     // Матрицы преобразования (без изменений)
@@ -133,17 +127,14 @@ void TriangleApp::Shutdown()
 {
     LOG_INFO("Shutting down Triangle Application...");
 
-    // =============================================
-    // ИНТЕГРАЦИЯ RESOURCE MANAGER: ВЫГРУЗКА РЕСУРСОВ
-    // =============================================
     if (m_shaderProgram != 0) {
-        // Выгружаем шейдер через ResourceManager
+        // Выгружаем шейдер
         RESOURCE_MANAGER.UnloadShader("triangle_shader");      // Для встроенных шейдеров
         RESOURCE_MANAGER.UnloadShader("triangle_shader_file"); // Для файловых шейдеров
         m_shaderProgram = 0;
     }
 
-    // Очистка геометрии (без изменений)
+    // Очистка геометрии
     if (m_VAO != 0) {
         GetRenderer()->DeleteVAO(m_VAO);
         m_VAO = 0;

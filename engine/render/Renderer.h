@@ -71,13 +71,6 @@ public:
     void CheckGLError(const std::string &operation);
 
 private:
-    GLuint      CompileShader(const std::string &source, GLenum type);          // Компиляция отдельного шейдера
-    GLuint      LinkShaderProgram(GLuint vertextShader, GLuint fragmentShader); // Линковка шейдерной программы
-    std::string ReadFile(const std::string &path);                              // Чтение файла в строку
-    // Проверка существования файла
-    bool ValidateShaderFile(const std::string &path, const std::string &shaderType);
-
-private:
     bool m_initialized = false; // Флаг успешной инициализации рендера
 };
 #endif // RENDERER_H

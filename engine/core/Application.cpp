@@ -90,13 +90,12 @@ void Application::InitializeEngine()
         return;
     }
 
-    // Инициализация системы ввода привязкой к онку
+    // Инициализация системы ввода привязкой к окну
     Input::Initialize(m_window->GetNativeWindow());
 
     // Установка callback для обработки изменения размера окна
     // Лямбда захватывает this для доступа к методам класса
     m_window->SetResizeCallback([this](int width, int height) {
-        LOG_INFO("Window resized to {}x{}", width, height);
         // Уведомляем приложение об изменении размера окна
         OnWindowResize(width, height);
         // Обновляем viewport рендера, чтобы избежать искажений

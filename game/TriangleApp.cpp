@@ -23,9 +23,7 @@ void TriangleApp::Initialize()
             EmbeddedShaders::TRIANGLE_FRAGMENT_SHADER
             );
 
-    if (m_shaderProgram != 0) {
-        LOG_INFO("Successfully loaded embedded shaders via ResourceManager!");
-    } else {
+    if (m_shaderProgram != 0) { LOG_INFO("Successfully loaded embedded shaders via ResourceManager!"); } else {
         // Fallback на файлы (если встроенные не загрузились)
         LOG_WARN("Failed to load embedded shaders, trying file paths...");
 
@@ -66,11 +64,20 @@ void TriangleApp::Initialize()
     // СОЗДАНИЕ ГЕОМЕТРИИ ТРЕУГОЛЬНИКА
     // =============================================
     GLfloat vertices[] = {
-            // Позиции         // Цвета
-            0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // Bottom Right
-            -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom Left
-            0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f    // Top
+            // Позиции          // Цвета             // Текстурные координаты
+            0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // Верхний правый
+            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,  // Нижний правый
+            -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Нижний левый
+            -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f   // Верхний левый
     };
+
+    GLfloat texCoords[] = {
+            0.0f, 0.0f, // Нижний левый угол
+            1.0f, 0.0f, // Нижний правый угол
+            0.5f, 1.0f  // Верхний угол
+    };
+
+    RESOURCE_MANAGER.LoadTexture("textures/container.jpg");
 
     m_VAO = GetRenderer()->CreateVAO();
     m_VBO = GetRenderer()->CreateVBO(vertices, sizeof(vertices));
@@ -98,7 +105,7 @@ void TriangleApp::Render()
 
     glUseProgram(m_shaderProgram);
 
-    // Матрицы преобразования (без изменений)
+    // Матрицы преобразования
     glm::mat4 model = TransformManager::CreateRotatingModel(glfwGetTime(), 1.0f);
     glm::mat4 view  = TransformManager::CreateViewMatrix(
             glm::vec3(0.0f, 0.0f, 3.0f),
@@ -106,17 +113,17 @@ void TriangleApp::Render()
             );
     glm::mat4 projection = TransformManager::CreateProjectionMatrix(45.0f, 800.0f / 600.0f);
 
-    // Установка матриц (без изменений)
+    // Установка матриц
     GetRenderer()->SetMVPMatrices(m_shaderProgram, model, view, projection);
 
-    // Градиент (без изменений)
+    // Градиент
     GetRenderer()->SetShaderGradient(m_shaderProgram,
                                      glm::vec3(1.0f, 0.7f, 0.5f),
                                      glm::vec3(0.3f, 0.8f, 1.0f),
                                      1.0f
             );
 
-    // Отрисовка (без изменений)
+    // Отрисовка
     glBindVertexArray(m_VAO);
     GetRenderer()->DrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);

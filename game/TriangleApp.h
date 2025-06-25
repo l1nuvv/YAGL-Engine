@@ -13,9 +13,9 @@ class TriangleApp: public Application
 {
 public:
     TriangleApp() : Application(800, 600, "TriangleApp") {}
-    virtual void Initialize() override;
-    virtual void Render() override;
-    virtual void Shutdown() override;
+    void Initialize() override;
+    void Render() override;
+    void Shutdown() override;
     //virtual void OnWindowResize(int width, int height) override;
 
 private:

@@ -2,8 +2,9 @@
 BasedOnStyle: LLVM
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: Consecutive
-AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
 AlignOperands: Align
 AllowAllArgumentsOnNextLine: false
 AllowAllConstructorInitializersOnNextLine: false
@@ -41,6 +42,7 @@ ContinuationIndentWidth: 8
 IndentCaseLabels: true
 IndentWidth: 4
 KeepEmptyLinesAtTheStartOfBlocks: false
+AlignArrayOfStructures: Left
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: All
 ObjCSpaceAfterProperty: false
@@ -67,3 +69,5 @@ TabWidth: 4
 UseTab: Never
 AlignTrailingComments: true
 IndentPPDirectives: None
+PenaltyBreakAssignment: 1000
+PenaltyBreakBeforeFirstCallParameter: 1000

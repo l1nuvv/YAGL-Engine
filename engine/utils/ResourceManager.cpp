@@ -183,7 +183,7 @@ std::string ResourceManager::ReadFile(const std::string &path)
 
 void ResourceManager::Shutdown()
 {
-    for (auto &[name, shader]: m_shaders) { glDeleteShader(shader); }
+    for (auto &[name, program]: m_shaders) { glDeleteProgram(program); }
     m_shaders.clear();
 
     for (auto &[path, texture]: m_textures) { glDeleteTextures(1, &texture); }

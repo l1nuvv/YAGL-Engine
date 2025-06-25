@@ -19,8 +19,10 @@ public:
     //virtual void OnWindowResize(int width, int height) override;
 
 private:
+    GLuint m_textureID     = 0;
     GLuint m_shaderProgram = 0;
     GLuint m_VAO           = 0;
     GLuint m_VBO           = 0;
+    GLuint m_EBO           = 0;
 };
 #endif // TRIANGLEAPP_H

@@ -23,15 +23,15 @@ void TriangleApp::Initialize()
             EmbeddedShaders::TRIANGLE_FRAGMENT_SHADER
             );
 
-    if (m_shaderProgram != 0) { LOG_INFO("Successfully loaded embedded shaders via ResourceManager!"); } else {
+    if (m_shaderProgram != 0) {
+        LOG_INFO("Successfully loaded embedded shaders via ResourceManager!");
+    } else {
         // Fallback на файлы (если встроенные не загрузились)
         LOG_WARN("Failed to load embedded shaders, trying file paths...");
 
         std::vector<std::pair<std::string, std::string>> shaderPaths = {
                 {"assets/shaders/triangle.vert", "assets/shaders/triangle.frag"},
-                {"../assets/shaders/triangle.vert", "../assets/shaders/triangle.frag"},
-                {"shaders/triangle.vert", "shaders/triangle.frag"},
-                {"./shaders/triangle.vert", "./shaders/triangle.frag"}
+                {"../assets/shaders/triangle.vert", "../assets/shaders/triangle.frag"}
         };
 
         for (const auto &paths: shaderPaths) {
@@ -61,37 +61,57 @@ void TriangleApp::Initialize()
     }
 
     // =============================================
-    // СОЗДАНИЕ ГЕОМЕТРИИ ТРЕУГОЛЬНИКА
+    // СОЗДАНИЕ ГЕОМЕТРИИ КВАДРАТА С ИНДЕКСАМИ
     // =============================================
+    // clang-format off
     GLfloat vertices[] = {
-            // Позиции          // Цвета             // Текстурные координаты
-            0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // Верхний правый
-            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,  // Нижний правый
-            -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Нижний левый
-            -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f   // Верхний левый
+        // Позиции          // Цвета             // Текстурные координаты
+        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // Верхний правый
+        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // Нижний правый
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // Нижний левый
+       -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // Верхний левый
     };
 
-    GLfloat texCoords[] = {
-            0.0f, 0.0f, // Нижний левый угол
-            1.0f, 0.0f, // Нижний правый угол
-            0.5f, 1.0f  // Верхний угол
+    // Индексы для отрисовки квадрата из двух треугольников
+    GLuint indices[] = {
+        0, 1, 3,   // Первый треугольник
+        1, 2, 3    // Второй треугольник
     };
+    // clang-format on
 
-    RESOURCE_MANAGER.LoadTexture("textures/container.jpg");
+    // Загрузка текстуры
+    m_textureID = RESOURCE_MANAGER.LoadTexture("../assets/textures/container.jpg");
+    if (m_textureID == 0) {
+        LOG_ERROR("Failed to load texture from any source");
+    }
 
+    // Генерация буферов
     m_VAO = GetRenderer()->CreateVAO();
     m_VBO = GetRenderer()->CreateVBO(vertices, sizeof(vertices));
 
+    // Создаем EBO для индексов
+    glGenBuffers(1, &m_EBO);
+
     glBindVertexArray(m_VAO);
+
+    // Привязка VBO
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
+    // Привязка EBO
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
     // Атрибут позиций
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *) 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *) 0);
     glEnableVertexAttribArray(0);
 
     // Атрибут цветов
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *) (3 * sizeof(GLfloat)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *) (3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
+
+    // Атрибут текстуры
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *) (6 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -123,9 +143,19 @@ void TriangleApp::Render()
                                      1.0f
             );
 
+    if (m_textureID != 0) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_textureID);
+
+        GLint textureLocation = glGetUniformLocation(m_shaderProgram, "ourTexture");
+        if (textureLocation != -1) {
+            glUniform1i(textureLocation, 0);
+        }
+    }
+
     // Отрисовка
     glBindVertexArray(m_VAO);
-    GetRenderer()->DrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // ✅ Теперь правильно используем DrawElements
     glBindVertexArray(0);
     glUseProgram(0);
 }
@@ -141,6 +171,11 @@ void TriangleApp::Shutdown()
         m_shaderProgram = 0;
     }
 
+    if (m_textureID != 0) {
+        RESOURCE_MANAGER.UnloadTexture("../assets/textures/container.jpg");
+        m_textureID = 0;
+    }
+
     // Очистка геометрии
     if (m_VAO != 0) {
         GetRenderer()->DeleteVAO(m_VAO);
@@ -150,5 +185,10 @@ void TriangleApp::Shutdown()
     if (m_VBO != 0) {
         GetRenderer()->DeleteVBO(m_VBO);
         m_VBO = 0;
+    }
+
+    if (m_EBO != 0) {
+        glDeleteBuffers(1, &m_EBO);
+        m_EBO = 0;
     }
 }

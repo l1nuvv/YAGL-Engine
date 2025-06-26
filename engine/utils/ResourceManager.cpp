@@ -8,11 +8,144 @@
 #include "Logger.h"
 
 #include <fstream>
+#include <filesystem>
+#include <algorithm>
+
+namespace fs = std::filesystem;
 
 ResourceManager &ResourceManager::GetInstance()
 {
     static ResourceManager instance;
     return instance;
+}
+
+void ResourceManager::Initialize(const std::string &assetsPath)
+{
+    m_assetsPath = assetsPath;
+    LOG_INFO("Initializing ResourceManager with assets path: {}", m_assetsPath);
+
+    // Проверяем существование папки assets
+    if (!fs::exists(m_assetsPath)) {
+        LOG_WARN("Assets directory {} does not exist, creating it...", m_assetsPath);
+        fs::create_directories(m_assetsPath);
+        fs::create_directories(m_assetsPath + "/textures");
+        fs::create_directories(m_assetsPath + "/shaders");
+    }
+
+    // Сканируем доступные ресурсы
+    ScanTextures();
+    ScanShaders();
+
+    LOG_INFO("ResourceManager initialized. Found {} textures, {} shaders",
+             m_textureFilenames.size(), m_shaderFilenames.size());
+}
+
+void ResourceManager::ScanTextures()
+{
+    std::vector<std::string> texturePaths = {
+            m_assetsPath + "/textures",
+            "../" + m_assetsPath + "/textures"
+    };
+
+    std::vector<std::string> supportedExtensions = {".jpg", ".jpeg", ".png", ".bmp", ".tga"};
+
+    for (const auto &texturePath: texturePaths) {
+        if (!fs::exists(texturePath)) continue;
+
+        try {
+            for (const auto &entry: fs::recursive_directory_iterator(texturePath)) {
+                if (!entry.is_regular_file()) continue;
+
+                std::string extension = entry.path().extension().string();
+                std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+
+                if (std::find(supportedExtensions.begin(), supportedExtensions.end(), extension) != supportedExtensions.
+                    end()) {
+                    std::string filename = entry.path().filename().string();
+                    std::string fullPath = entry.path().string();
+
+                    // Нормализуем разделители путей
+                    std::replace(fullPath.begin(), fullPath.end(), '\\', '/');
+
+                    m_textureFilenames[filename] = fullPath;
+                    LOG_DEBUG("Found texture: {} -> {}", filename, fullPath);
+                }
+            }
+        } catch (const fs::filesystem_error &e) {
+            LOG_WARN("Error scanning texture directory {}: {}", texturePath, e.what());
+        }
+    }
+}
+
+void ResourceManager::ScanShaders()
+{
+    std::vector<std::string> shaderPaths = {
+            m_assetsPath + "/shaders",
+            "../" + m_assetsPath + "/shaders"
+    };
+
+    std::vector<std::string> supportedExtensions = {".vert", ".frag", ".geom", ".comp"};
+
+    for (const auto &shaderPath: shaderPaths) {
+        if (!fs::exists(shaderPath)) continue;
+
+        try {
+            for (const auto &entry: fs::recursive_directory_iterator(shaderPath)) {
+                if (!entry.is_regular_file()) continue;
+
+                std::string extension = entry.path().extension().string();
+                std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+
+                if (std::find(supportedExtensions.begin(), supportedExtensions.end(), extension) != supportedExtensions.
+                    end()) {
+                    std::string filename = entry.path().filename().string();
+                    std::string fullPath = entry.path().string();
+
+                    // Нормализуем разделители путей
+                    std::replace(fullPath.begin(), fullPath.end(), '\\', '/');
+
+                    m_shaderFilenames[filename] = fullPath;
+                    LOG_DEBUG("Found shader: {} -> {}", filename, fullPath);
+                }
+            }
+        } catch (const fs::filesystem_error &e) {
+            LOG_WARN("Error scanning shader directory {}: {}", shaderPath, e.what());
+        }
+    }
+}
+
+std::string ResourceManager::FindTexturePath(const std::string &filename) const
+{
+    auto it = m_textureFilenames.find(filename);
+    if (it != m_textureFilenames.end()) {
+        return it->second;
+    }
+
+    // Если не найден, попробуем найти без учета регистра
+    std::string lowerFilename = filename;
+    std::transform(lowerFilename.begin(), lowerFilename.end(), lowerFilename.begin(), ::tolower);
+
+    for (const auto &[file, path]: m_textureFilenames) {
+        std::string lowerFile = file;
+        std::transform(lowerFile.begin(), lowerFile.end(), lowerFile.begin(), ::tolower);
+        if (lowerFile == lowerFilename) {
+            return path;
+        }
+    }
+
+    return "";
+}
+
+std::string ResourceManager::FindShaderPath(const std::string &filename) const
+{
+    auto it = m_shaderFilenames.find(filename);
+    return (it != m_shaderFilenames.end()) ? it->second : "";
+}
+
+std::string ResourceManager::ExtractFilename(const std::string &path) const
+{
+    size_t lastSlash = path.find_last_of("/\\");
+    return (lastSlash != std::string::npos) ? path.substr(lastSlash + 1) : path;
 }
 
 GLuint ResourceManager::LoadShader(const std::string &name, const std::string &vertexSource,
@@ -48,6 +181,7 @@ GLuint ResourceManager::LoadShader(const std::string &name, const std::string &v
         GLchar infoLog[512];
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
         LOG_ERROR("Fragment shader compilation failed: {}", infoLog);
+        glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
         return 0;
     }
@@ -60,9 +194,11 @@ GLuint ResourceManager::LoadShader(const std::string &name, const std::string &v
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
         GLchar infoLog[512];
-        glGetShaderInfoLog(program, 512, nullptr, infoLog);
+        glGetProgramInfoLog(program, 512, nullptr, infoLog);
         LOG_ERROR("Program linking failed: {}", infoLog);
         glDeleteProgram(program);
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
         return 0;
     }
 
@@ -88,7 +224,7 @@ void ResourceManager::UnloadShader(const std::string &name)
 {
     auto it = m_shaders.find(name);
     if (it != m_shaders.end()) {
-        glDeleteProgram(it->second); // Программа удаляется через glDeleteProgram
+        glDeleteProgram(it->second);
         m_shaders.erase(it);
         LOG_INFO("Shader {} unloaded", name);
     } else {
@@ -96,18 +232,28 @@ void ResourceManager::UnloadShader(const std::string &name)
     }
 }
 
-GLuint ResourceManager::LoadTexture(const std::string &path)
+GLuint ResourceManager::LoadTexture(const std::string &filename)
 {
-    if (m_textures.find(path) != m_textures.end()) {
-        LOG_WARN("Texture {} already loaded", path);
-        return m_textures[path];
+    // Проверяем, не загружена ли уже текстура с таким именем
+    if (m_textures.find(filename) != m_textures.end()) {
+        LOG_WARN("Texture {} already loaded", filename);
+        return m_textures[filename];
     }
+
+    // Ищем полный путь к файлу
+    std::string fullPath = FindTexturePath(filename);
+    if (fullPath.empty()) {
+        LOG_ERROR("Texture file {} not found in assets directories", filename);
+        return 0;
+    }
+
+    LOG_INFO("Loading texture: {} from {}", filename, fullPath);
 
     int width, height, channels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    unsigned char *data = stbi_load(fullPath.c_str(), &width, &height, &channels, 0);
     if (!data) {
-        LOG_ERROR("Failed to load texture {}", path);
+        LOG_ERROR("Failed to load texture {}: {}", fullPath, stbi_failure_reason());
         return 0;
     }
 
@@ -134,7 +280,7 @@ GLuint ResourceManager::LoadTexture(const std::string &path)
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
@@ -144,31 +290,57 @@ GLuint ResourceManager::LoadTexture(const std::string &path)
     stbi_image_free(data);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    m_textures[path] = texture;
-    LOG_INFO("Texture {} loaded ({}x{}, {} channels)", path, width, height, channels);
+    m_textures[filename] = texture;
+    LOG_INFO("Texture {} loaded successfully ({}x{}, {} channels)", filename, width, height, channels);
     return texture;
 }
 
-GLuint ResourceManager::GetTexture(const std::string &path) const
+GLuint ResourceManager::GetTexture(const std::string &filename) const
 {
-    auto it = m_textures.find(path);
+    auto it = m_textures.find(filename);
     if (it == m_textures.end()) {
-        LOG_ERROR("Texture {} not found", path);
+        LOG_ERROR("Texture {} not found", filename);
         return 0;
     }
     return it->second;
 }
 
-void ResourceManager::UnloadTexture(const std::string &path)
+void ResourceManager::UnloadTexture(const std::string &filename)
 {
-    auto it = m_textures.find(path);
+    auto it = m_textures.find(filename);
     if (it != m_textures.end()) {
         glDeleteTextures(1, &it->second);
         m_textures.erase(it);
-        LOG_INFO("Texture {} unloaded", path);
+        LOG_INFO("Texture {} unloaded", filename);
     } else {
-        LOG_WARN("Texture {} not found for unloading", path);
+        LOG_WARN("Texture {} not found for unloading", filename);
     }
+}
+
+std::vector<std::string> ResourceManager::GetAvailableTextures() const
+{
+    std::vector<std::string> textures;
+    for (const auto &[filename, path]: m_textureFilenames) {
+        textures.push_back(filename);
+    }
+    return textures;
+}
+
+void ResourceManager::PrintAvailableResources() const
+{
+    LOG_INFO("=== Available Resources ===");
+
+    LOG_INFO("Textures ({}):", m_textureFilenames.size());
+    for (const auto &[filename, path]: m_textureFilenames) {
+        LOG_INFO("  - {}", filename);
+    }
+
+    LOG_INFO("Shaders ({}):", m_shaderFilenames.size());
+    for (const auto &[filename, path]: m_shaderFilenames) {
+        LOG_INFO("  - {}", filename);
+    }
+
+    LOG_INFO("========================");
 }
 
 std::string ResourceManager::ReadFile(const std::string &path)
@@ -183,13 +355,34 @@ std::string ResourceManager::ReadFile(const std::string &path)
 
 void ResourceManager::Shutdown()
 {
-    for (auto &[name, program]: m_shaders) { glDeleteProgram(program); }
+    for (auto &[name, program]: m_shaders) {
+        glDeleteProgram(program);
+    }
     m_shaders.clear();
 
-    for (auto &[path, texture]: m_textures) { glDeleteTextures(1, &texture); }
+    for (auto &[filename, texture]: m_textures) {
+        glDeleteTextures(1, &texture);
+    }
     m_textures.clear();
+
+    m_textureFilenames.clear();
+    m_shaderFilenames.clear();
 
     LOG_INFO("ResourceManager shutdown completed");
 }
 
-ResourceManager::~ResourceManager() { Shutdown(); }
+void ResourceManager::BindTexture(const std::string &filename, GLenum textureUnit) const
+{
+    GLuint textureID = GetTexture(filename);
+    if (textureID != 0) {
+        glActiveTexture(textureUnit);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+    } else {
+        LOG_WARN("Failed to bind texture {}: not loaded", filename);
+    }
+}
+
+ResourceManager::~ResourceManager()
+{
+    Shutdown();
+}

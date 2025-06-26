@@ -16,6 +16,12 @@ void TriangleApp::Initialize()
         return;
     }
 
+    // Инициализируем ResourceManager с автоматическим сканированием
+    RESOURCE_MANAGER.Initialize("assets"); // или "YAGL-Engine/assets"
+
+    // Показываем доступные ресурсы (для отладки)
+    RESOURCE_MANAGER.PrintAvailableResources();
+
     // Пытаемся использовать встроенные шейдеры через ResourceManager
     m_shaderProgram = RESOURCE_MANAGER.LoadShader(
             "triangle_shader", // Уникальное имя для кэширования
@@ -26,39 +32,13 @@ void TriangleApp::Initialize()
     if (m_shaderProgram != 0) {
         LOG_INFO("Successfully loaded embedded shaders via ResourceManager!");
     } else {
-        // Fallback на файлы (если встроенные не загрузились)
-        LOG_WARN("Failed to load embedded shaders, trying file paths...");
-
-        std::vector<std::pair<std::string, std::string>> shaderPaths = {
-                {"assets/shaders/triangle.vert", "assets/shaders/triangle.frag"},
-                {"../assets/shaders/triangle.vert", "../assets/shaders/triangle.frag"}
-        };
-
-        for (const auto &paths: shaderPaths) {
-            // Читаем шейдеры из файлов
-            std::string vertexSource   = ResourceManager::ReadFile(paths.first);
-            std::string fragmentSource = ResourceManager::ReadFile(paths.second);
-
-            if (!vertexSource.empty() && !fragmentSource.empty()) {
-                // Загружаем через ResourceManager
-                m_shaderProgram = RESOURCE_MANAGER.LoadShader(
-                        "triangle_shader_file", // Другое имя для файловых шейдеров
-                        vertexSource,
-                        fragmentSource
-                        );
-
-                if (m_shaderProgram != 0) {
-                    LOG_INFO("Loaded shaders from files via ResourceManager: {} and {}", paths.first, paths.second);
-                    break;
-                }
-            }
-        }
-    }
-
-    if (m_shaderProgram == 0) {
-        LOG_ERROR("Failed to load shaders from any source");
+        LOG_ERROR("Failed to load embedded shaders!");
         return;
     }
+
+    RESOURCE_MANAGER.LoadTexture("container.jpg");
+    RESOURCE_MANAGER.LoadTexture("awesomeface.png");
+
 
     // =============================================
     // СОЗДАНИЕ ГЕОМЕТРИИ КВАДРАТА С ИНДЕКСАМИ
@@ -78,12 +58,6 @@ void TriangleApp::Initialize()
         1, 2, 3    // Второй треугольник
     };
     // clang-format on
-
-    // Загрузка текстуры
-    m_textureID = RESOURCE_MANAGER.LoadTexture("../assets/textures/container.jpg");
-    if (m_textureID == 0) {
-        LOG_ERROR("Failed to load texture from any source");
-    }
 
     // Генерация буферов
     m_VAO = GetRenderer()->CreateVAO();
@@ -143,19 +117,15 @@ void TriangleApp::Render()
                                      1.0f
             );
 
-    if (m_textureID != 0) {
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_textureID);
+    // Привязываем текстуру, если она загружена
+    RESOURCE_MANAGER.BindTexture("container.jpg", GL_TEXTURE0);
+    glUniform1i(glGetUniformLocation(m_shaderProgram, "ourTexture1"), 0);
 
-        GLint textureLocation = glGetUniformLocation(m_shaderProgram, "ourTexture");
-        if (textureLocation != -1) {
-            glUniform1i(textureLocation, 0);
-        }
-    }
-
+    RESOURCE_MANAGER.BindTexture("awesomeface.png", GL_TEXTURE1);
+    glUniform1i(glGetUniformLocation(m_shaderProgram, "ourTexture2"), 1);
     // Отрисовка
     glBindVertexArray(m_VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // ✅ Теперь правильно используем DrawElements
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
     glUseProgram(0);
 }
@@ -165,14 +135,14 @@ void TriangleApp::Shutdown()
     LOG_INFO("Shutting down Triangle Application...");
 
     if (m_shaderProgram != 0) {
-        // Выгружаем шейдер
-        RESOURCE_MANAGER.UnloadShader("triangle_shader");      // Для встроенных шейдеров
-        RESOURCE_MANAGER.UnloadShader("triangle_shader_file"); // Для файловых шейдеров
+        RESOURCE_MANAGER.UnloadShader("triangle_shader");
         m_shaderProgram = 0;
     }
 
     if (m_textureID != 0) {
-        RESOURCE_MANAGER.UnloadTexture("../assets/textures/container.jpg");
+        // Указываем имя файла для выгрузки
+        RESOURCE_MANAGER.UnloadTexture("container.jpg");
+        RESOURCE_MANAGER.UnloadTexture("awesomeface.png");
         m_textureID = 0;
     }
 

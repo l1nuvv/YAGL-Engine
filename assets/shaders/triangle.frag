@@ -5,14 +5,21 @@ in vec2 TexCoord;
 
 out vec4 FragColor;
 
+// Uniform переменные для градиента
 uniform float time;
 uniform vec3 colorStart;
 uniform vec3 colorEnd;
-uniform sampler2D ourTexture;
+
+// Uniform переменные для текстуры
+uniform sampler2D ourTexture1;
+uniform sampler2D ourTexture2;
 
 void main()
 {
+    // Градиент
     float t = (sin(time) + 1.0f) / 2.0f;
     vec3 gradientColor = mix(colorStart, colorEnd, t);
-    FragColor = texture(ourTexture, TexCoord) * vec4(gradientColor, 1.0f);
+
+    // Привязка текстуры
+    FragColor = mix(texture(ourTexture1, TexCoord), texture(ourTexture2, TexCoord), 0.2f);
 }

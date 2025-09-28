@@ -16,13 +16,13 @@
 class Input
 {
 public:
-    static void Initialize(GLFWwindow *window); // Инициализация ввода привязкой к окну
-    static void ProcessInput();                 // Обработка базовых событий ввода каждый кадр
-    static bool IsKeyPressed(int key);          // Проверка нажатия конкретной клавиши
-    static bool ShouldClose();                  // Проверка запроса на закрытие приложения
+    static void Initialize(GLFWwindow* window); // Инициализация ввода привязкой к окну
+    static void ProcessInput(); // Обработка базовых событий ввода каждый кадр
+    static bool IsKeyPressed(int key); // Проверка нажатия конкретной клавиши
+    static bool ShouldClose(); // Проверка запроса на закрытие приложения
 
 private:
-    static GLFWwindow *s_window;        // Указатель на GLFW окно для получения состояние ввода
-    static bool        IsWindowValid(); // Проверка валидности окна перед обращением к GLFW функциям
+    static GLFWwindow* s_window; // Указатель на GLFW окно для получения состояние ввода
+    static bool IsWindowValid(); // Проверка валидности окна перед обращением к GLFW функциям
 };
 #endif // INPUT_H

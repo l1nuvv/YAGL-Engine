@@ -17,10 +17,9 @@
 class Window;
 class Renderer;
 
-class Application
-{
+class Application {
 public:
-    Application(int width = 1200, int height = 720, const std::string &title = "YAGL Engine");
+    Application(int width = 1200, int height = 720, const std::string& title = "YAGL Engine");
     virtual ~Application();
 
     // Основной метод запуска - управляет всем жизненным циклом движка
@@ -29,21 +28,26 @@ public:
     // Виртуальные методы для переопределения в наследниках
     // Позволяют кастомизировать поведение без изменения основной логики
     virtual void Initialize() {}
+
     virtual void Update(float /*deltaTime*/) {}
+
     virtual void Render() {}
+
     virtual void Shutdown() {}
 
     // Обработчики событий - реагируют на действия пользователя
     virtual void OnWindowResize(int /*width*/, int /*height*/) {}
+
     virtual void OnKeyPressed(int /*key*/) {}
+
     virtual void OnMouseMove(float /*x*/, float /*y*/) {}
 
     // Геттеры - дают доступ к внутренним компонентам
-    Window *  GetWindow() const { return m_window.get(); }
-    Renderer *GetRenderer() const { return m_renderer.get(); }
+    Window*   GetWindow() const { return m_window.get(); }
+    Renderer* GetRenderer() const { return m_renderer.get(); }
 
     // Синглтон, дающий глобальный доступ к приложению
-    static Application *GetInstance() { return s_instance; }
+    static Application* GetInstance() { return s_instance; }
 
 private:
     // Приватные методы управления движком
@@ -62,6 +66,6 @@ private:
     float m_deltaTime     = 0.0f; // deltaTime для плавности
 
     // Singleton instance - статический указатель на единственный экземпляр
-    static Application *s_instance;
+    static Application* s_instance;
 };
 #endif // APPLICATION_H

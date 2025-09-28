@@ -9,12 +9,13 @@
 #include "../utils/Logger.h"
 #include <glm/glm.hpp>
 
-Application *Application::s_instance = nullptr;
+Application* Application::s_instance = nullptr;
 
-Application::Application(int width, int height, const std::string &title)
+Application::Application(int width, int height, const std::string& title)
 {
     // Проверяем что не создается второй экземлпяр
-    if (s_instance) {
+    if (s_instance)
+    {
         LOG_ERROR("Application already exists!");
         return;
     }
@@ -39,7 +40,8 @@ void Application::Run()
     InitializeEngine();
 
     // Проверка, что инициализация прошла успешно перед запуском основного цикла
-    if (!m_running) {
+    if (!m_running)
+    {
         LOG_ERROR("Failed to initialize application!");
         return;
     }
@@ -47,7 +49,8 @@ void Application::Run()
     LOG_INFO("Running application...");
 
     // Основный цикл движка. Работает до сигнала завершения - ShutdownEngine()
-    while (m_running && !m_window->ShouldClose()) {
+    while (m_running && !m_window->ShouldClose())
+    {
         // Вычисляем время между кадрами для framerate независимых вычислений
         CalculateDeltaTime();
 
@@ -55,7 +58,8 @@ void Application::Run()
         Input::ProcessInput();
 
         // Проверка запроса на закрытие от системы ввода
-        if (Input::ShouldClose()) {
+        if (Input::ShouldClose())
+        {
             m_running = false;
             break;
         }
@@ -85,7 +89,8 @@ void Application::InitializeEngine()
     m_running = false;
 
     // Проверка, что окно успешно создано
-    if (!m_window) {
+    if (!m_window)
+    {
         LOG_ERROR("Window not created!");
         return;
     }
@@ -103,7 +108,8 @@ void Application::InitializeEngine()
     });
 
     // Инициализируем подсистему рендеринга изображения
-    if (!m_renderer->Initialize()) {
+    if (!m_renderer->Initialize())
+    {
         LOG_ERROR("Failed to initialize Renderer!");
         return;
     }

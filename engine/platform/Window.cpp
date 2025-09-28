@@ -8,20 +8,21 @@
 #include <GLFW/glfw3.h>
 
 
-Window::Window(const WindowProps &props) : m_window(nullptr) { Initialize(props); }
+Window::Window(const WindowProps& props) : m_window(nullptr) { Initialize(props); }
 
 Window::~Window() { Shutdown(); }
 
-void Window::Initialize(const WindowProps &props)
+void Window::Initialize(const WindowProps& props)
 {
     // Копирование параметров в локальное хранилище
-    m_data.title  = props.title;
-    m_data.width  = props.width;
+    m_data.title = props.title;
+    m_data.width = props.width;
     m_data.height = props.height;
-    m_data.vsync  = props.vsync;
+    m_data.vsync = props.vsync;
 
     // Инициализация GLFW(!)
-    if (!glfwInit()) {
+    if (!glfwInit())
+    {
         LOG_ERROR("Failed to initialize GLFW!");
         return;
     }
@@ -35,7 +36,8 @@ void Window::Initialize(const WindowProps &props)
     LOG_INFO("Creating window by GLFW {}x{}...", m_data.width, m_data.height);
     m_window = glfwCreateWindow(m_data.width, m_data.height, m_data.title.c_str(), nullptr, nullptr);
 
-    if (!m_window) {
+    if (!m_window)
+    {
         LOG_ERROR("Failed to create GLFW window!");
         glfwTerminate();
         return;
@@ -49,16 +51,17 @@ void Window::Initialize(const WindowProps &props)
 
     // Загружаем GLAD
     LOG_INFO("Loading OpenGl functions by GLAD...");
-    if (!gladLoadGLLoader((GLADloadproc) (glfwGetProcAddress))) {
+    if (!gladLoadGLLoader((GLADloadproc)(glfwGetProcAddress)))
+    {
         LOG_ERROR("Failed to initialize GLAD!");
         return;
     }
 
     // Логи для отладки
-    LOG_DEBUG("OpenGL Vendor: {}", (const char *) glGetString(GL_VENDOR));
-    LOG_DEBUG("OpenGL Renderer: {}", (const char *) glGetString(GL_RENDERER));
-    LOG_DEBUG("OpenGL Version: {}", (const char *) glGetString(GL_VERSION));
-    LOG_DEBUG("GLSL Version: {}", (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION));
+    LOG_DEBUG("OpenGL Vendor: {}", (const char*)glGetString(GL_VENDOR));
+    LOG_DEBUG("OpenGL Renderer: {}", (const char*)glGetString(GL_RENDERER));
+    LOG_DEBUG("OpenGL Version: {}", (const char*)glGetString(GL_VERSION));
+    LOG_DEBUG("GLSL Version: {}", (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     LOG_DEBUG("Viewport set to {}x{}...", m_data.width, m_data.height);
 
@@ -73,11 +76,12 @@ void Window::SetupCallbacks()
 {
     // Callback для изменения размера framebuffer
     // Вызывается когда пользователь меняет размер окна
-    glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow *window, int width, int height) {
+    glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int width, int height)
+    {
         // Получаем данные из user pointer WindowData
-        WindowData &data = *(WindowData *) glfwGetWindowUserPointer(window);
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
         // Обновляем сохраненные размеры
-        data.width  = width;
+        data.width = width;
         data.height = height;
         LOG_DEBUG("Framebuffer resized to {}x{}", width, height);
         // Если установлен callback, то уведомляем приложение
@@ -111,7 +115,8 @@ void Window::SetVSync(bool enabled)
 void Window::Shutdown()
 {
     // Освобождаем ресурсы в правильном порядке
-    if (m_window) {
+    if (m_window)
+    {
         glfwDestroyWindow(m_window);
         m_window = nullptr;
     }

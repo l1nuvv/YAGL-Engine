@@ -10,10 +10,11 @@
 #include "../engine/core/Application.h"
 
 
-class TriangleApp: public Application
-{
+class TriangleApp : public Application {
 public:
-    TriangleApp() : Application(800, 600, "TriangleApp") {}
+    TriangleApp() :
+        Application(800, 600, "TriangleApp") {}
+
     void Initialize() override;
     void Render() override;
     void Shutdown() override;

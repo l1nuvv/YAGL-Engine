@@ -1,9 +1,7 @@
-//
-// Optimized: Improved logger configuration with better defaults
-//
 #include "Logger.h"
 
-namespace Logger {
+namespace Logger
+{
     void Init()
     {
         auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -18,7 +16,7 @@ namespace Logger {
 #ifdef _DEBUG
         spdlog::set_level(spdlog::level::debug); // Show all in debug builds
 #else
-        spdlog::set_level(spdlog::level::info);  // Hide debug logs in release builds
+        spdlog::set_level(spdlog::level::info); // Hide debug logs in release builds
 #endif
     }
 }
